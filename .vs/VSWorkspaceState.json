@@ -1,8 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\DATN"
+    "\\DATN",
+    "\\DATN\\FuntionExcel",
+    "\\DATN\\Properties",
+    "\\packages"
   ],
-  "SelectedNode": "\\DATN\\ThisAddIn.cs",
+  "SelectedNode": "\\DATN\\FuntionExcel\\ExportJson.cs",
   "PreviewInSolutionExplorer": false
 }

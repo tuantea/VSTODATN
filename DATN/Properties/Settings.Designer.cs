@@ -21,6 +21,21 @@ namespace DATN.Properties {
             get {
                 return defaultInstance;
             }
+           
+        }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("row")]
+        public string CELL_ORDER
+        {
+            get
+            {
+                return ((string)(this["CELL_ORDER"]));
+            }
+            set
+            {
+                this["CELL_ORDER"] = value;
+            }
         }
     }
 }
