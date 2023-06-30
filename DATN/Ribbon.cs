@@ -70,8 +70,8 @@ namespace DATN
         }
         private void button_ExportExcelToJson(object sender, RibbonControlEventArgs e)
         {
-            Excel.Worksheet activeWorksheet = Globals.ThisAddIn.Application.ActiveSheet;
-            ExportJson.ExportExcelToJson(activeWorksheet);
+            Excel.Application excellApp = Globals.ThisAddIn.Application;
+            ExportJson.ExportExcelToJson(excellApp);
         }
         private void button_ExportExcelToJson1(object sender, RibbonControlEventArgs e)
         {
@@ -86,8 +86,8 @@ namespace DATN
         }
         private void button_ImportJsonToExcel(object sender, RibbonControlEventArgs e)
         {
-            Excel.Worksheet activeWorksheet = Globals.ThisAddIn.Application.ActiveSheet;
-            ImportJson.ImportJsonToExcel(activeWorksheet);
+            Excel.Application excellApp = Globals.ThisAddIn.Application;
+            ImportJson.ImportJsonToExcel(excellApp);
         }
         private void buttonImage2Cells_Click(object sender, RibbonControlEventArgs e)
         {   //load image into cells - by MSc Tien

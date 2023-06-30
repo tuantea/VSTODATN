@@ -8,53 +8,78 @@ using Microsoft.Office.Interop.Excel;
 using Spire.Xls;
 using Spire.Xls.Collections;
 using Spire.Xls.Core;
+using Microsoft.Office.Tools.Excel;
+using System.Text.Json.Nodes;
+
 namespace DATN.FuntionExcel
 {
     internal class ExportJson
     {
-        public static void ExportExcelToJson(Excel.Worksheet worksheet)
+        public static void ExportExcelToJson(Excel.Application excellApp)
         {
             // Xác định phạm vi dữ liệu trong Excel (ví dụ: từ ô A1 đến ô C10)
             int startRow = 1;
             int startColumn = 1;
             int endRow = 10;
-            int endColumn = 3;
+            int endColumn = 100;
 
-            // Tạo một đối tượng JArray để lưu trữ dữ liệu từ Excel
-            JArray jsonArray = new JArray();
-
-            // Lặp qua các ô trong phạm vi và thêm dữ liệu vào JArray
-            for (int row = startRow; row <= endRow; row++)
+            JObject json = new JObject();
+            JObject config = new JObject();
+            config["visible"] = excellApp.Visible;
+            config["activatesheet"] = true;
+            config["terminate"] = false;
+            json["config"] = config;
+            JArray sheets = new JArray();
+            JArray cells = new JArray();
+            Excel.Workbook workbook = excellApp.ActiveWorkbook;
+            foreach (Excel.Worksheet sheet1 in workbook.Sheets)
             {
-                JObject jsonObject = new JObject();
-                for (int column = startColumn; column <= endColumn; column++)
+                JObject sheet = new JObject();
+                sheet["name"] = sheet1.Name;
+                sheet["visible"] = true;
+                for (int row = startRow; row <= endRow; row++)
                 {
-                    Excel.Range cell = worksheet.Cells[row, column];
-                    string cellValue = cell.Value != null ? cell.Value.ToString() : string.Empty;
-                    string columnName = ((char)(column + 64)).ToString()+row; // Chuyển đổi số cột thành chữ cái tương ứng (A, B, C, ...)
-                    jsonObject.Add(columnName, cellValue);
+                    for (int column = startColumn; column <= endColumn; column++)
+                    {
+                       
+                        Excel.Range cell = sheet1.Cells[row, column];
+                        if (cell.Value2 != null)
+                        {
+                            JObject cell1 = new JObject();
+                            if (column > 26)
+                            {
+                                cell1["pos"] = ((char)(column / 26 + 64)).ToString() + ((char)(column % 26 + 64)).ToString() + row;
+                            }
+                            else
+                            {
+                                cell1["pos"] = ((char)(column % 26 + 64)).ToString() + row;
+                            }
+                            cell1["value"] = cell.Value != null ? cell.Value.ToString() : string.Empty;
+                            cells.Add(cell1);
+                        }
+                      
+                    }
                 }
-                jsonArray.Add(jsonObject);
+
+                sheet["cells"] = cells;
+                sheets.Add(sheet);
             }
 
-            // Chuyển đổi JArray thành chuỗi JSON
-            string jsonContent = jsonArray.ToString();
+            json["sheets"] = sheets;
 
-            // Lưu chuỗi JSON vào tệp
+            string jsonContent = json.ToString();
+
             try
             {
-                // Khởi tạo đối tượng SaveFileDialog
+
                 SaveFileDialog saveFileDialog = new SaveFileDialog();
                 saveFileDialog.Filter = "Json (*.json)|*.json|All files (*.*)|*.*";
                 saveFileDialog.Title = "Save File";
 
-                // Mở hộp thoại Save File Dialog và chờ người dùng chọn vị trí và tên tệp
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Lấy đường dẫn và tên tệp từ SaveFileDialog
                     string filePath = saveFileDialog.FileName;
 
-                    // Tạo tệp mới
                     FileStream fileStream = File.Create(filePath);
                     fileStream.Close();
                     File.WriteAllText(filePath, jsonContent);

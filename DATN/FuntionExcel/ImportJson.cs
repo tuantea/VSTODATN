@@ -13,7 +13,7 @@ namespace DATN.FuntionExcel
 {
     internal class ImportJson
     {
-        public static void ImportJsonToExcel(Excel.Worksheet worksheet)
+        public static void ImportJsonToExcel(Excel.Application excellApp)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Json (*.json)|*.json|All files (*.*)|*.*";
@@ -24,22 +24,55 @@ namespace DATN.FuntionExcel
             }
             string jsonContent = File.ReadAllText(openFileDialog.FileName);
             dynamic jsonData = JsonConvert.DeserializeObject(jsonContent);
-
             bool isVisible = (bool)jsonData["config"]["visible"];
-            bool shouldPrintNow = (bool)jsonData["config"]["printnow"];
-            bool shouldActivateSheet = (bool)jsonData["config"]["activatesheet"];
-            bool shouldTerminate = (bool)jsonData["config"]["terminate"];
-
-            JArray documentsArray = (JArray)jsonData["documents"];
-            JObject firstDocument = (JObject)documentsArray.First;
-
-            JArray contentControlsArray = (JArray)firstDocument["contentcontrols"];
-            foreach (JObject contentControl in contentControlsArray)
+            bool activateSheet = (bool)jsonData["config"]["activatesheet"];
+            bool terminate = (bool)jsonData["config"]["terminate"];
+            excellApp.Visible = isVisible;
+            Excel.Workbook workbook = excellApp.Workbooks.Add();
+            JArray sheets = (JArray)jsonData["sheets"];
+            foreach (JObject sheetData in sheets)
             {
-                string title = (string)contentControl["title"];
-                string value = (string)contentControl["value"];
+                string sheetName = (string)sheetData["name"];
+                bool checkSheetName = false;
+                Excel.Worksheet worksheet;
+                foreach (Excel.Worksheet sheet in workbook.Sheets)
+                {
+                    
+                    if (sheet.Name == sheetName) {
+                        checkSheetName = true;
+                        
+                    }
+                }
+                // Tạo sheet mới trong workbook
+                if (!checkSheetName)
+                {
+                    worksheet = workbook.Sheets.Add();
+                    worksheet.Name = sheetName;
+                }
+                else
+                {
+                    worksheet = workbook.Worksheets[sheetName];
+                }
+                JArray cells = (JArray)sheetData["cells"];
+                foreach (JObject cellData in cells)
+                {
+                    string cellPos = (string)cellData["pos"];
+                    string cellValue = (string)cellData["value"];
 
-                // Do something with the title and value, such as populating them in Excel cells
+                    Excel.Range cell = worksheet.Range[cellPos];
+                    cell.Value = cellValue;
+                }
+            }
+
+            // Kích hoạt sheet đầu tiên
+            if (activateSheet)
+            {
+                Excel.Worksheet firstSheet = (Excel.Worksheet)workbook.Sheets[1];
+                firstSheet.Activate();
+            }
+            if (terminate)
+            {
+                excellApp.Quit();
             }
         }
 
